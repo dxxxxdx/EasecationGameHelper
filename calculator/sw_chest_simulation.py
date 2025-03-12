@@ -1,7 +1,8 @@
 import calculator.sw_dict as sw_dict
 import random
 from calculator.sw import effctive_hp_calc
-
+import tkinter as tk
+import tkinter.ttk as ttk
 
 def sw_simulation(times):
     total_list = []
@@ -33,9 +34,9 @@ def sw_simulation(times):
     best_equ = orgnize_armour(total_list)
     scorex = effctive_hp_calc(best_equ)
     if None in best_equ:
-        comleted = 0
+        comleted = False
     else:
-        comleted = 1
+        comleted = True
     return (total_list,best_equ,comleted,scorex)
 
 
@@ -117,20 +118,71 @@ def score(best_equ):
     return total
 
 
-def test ():
-    a1 = 0
-    maxx = 0
-    for i1 in range(100):
+
+
+
+def sw_simu_gui():
+    root = tk.Tk()
+    root.geometry("1000x500")
+    button1 = tk.Button(root,text="模拟1次",command=lambda :simu())
+    res = None
+    def simu():
+        nonlocal res
         res = sw_simulation(3)
-        a1 += res
-        if res > maxx:
-            maxx = res
+        sw_simu_label_updater(res,label_set)
+    label1 = tk.Label(root)
+    label2 = tk.Label(root)
+    label3 = tk.Label(root)
+    label4 = tk.Label(root)
+    label5 = tk.Label(root)
+    label6 = tk.Label(root)
+    label7 = tk.Label(root)
+    label8 = tk.Label(root)
+    label9 = tk.Label(root)
+    label10 = tk.Label(root)
 
-    print(maxx)
-    print(a1/100)
+    label_set = [label1,label2,label3,label4,label5,label6,label7,label8,label9,label10]
+    button1.pack()
+    label1.pack()
+    label2.pack()
+    label3.pack()
+    label4.pack()
+    label5.pack()
+    label6.pack()
+    label7.pack()
+    label8.pack()
+    label9.pack()
+    label10.pack()
 
+    root.mainloop()
+
+
+
+
+
+def sw_simu_label_updater(res,label_set):
+    total_list = res[0]
+    for i,sublist in enumerate(total_list,start=1):
+        label_set[i].configure(text=sublist)
+    label_set[-3].configure(text=f"\n你的最好装备：{res[1]}",fg="red")
+    label_set[-2].configure(text=f'你的缺甲状态为：{not res[2]}')
+    label_set[-1].configure(text=f"你装备的折合血量为{res[3]:.2f}")
+
+
+def avg_effective_hp():
+    res = 0
+    for i in range(10000):
+        res += sw_simulation(3)[3]
+    print(f"平均折合血量{res/10000:.2f}")
+
+def avg_completeness():
+    res = 0
+    for i in range(10000):
+        res += sw_simulation(3)[2]
+    print(f"平均缺甲率{res/10000:.2f}")
 
 
 
 if __name__ == "__main__":
-    test()
+    avg_completeness()
+    avg_effective_hp()

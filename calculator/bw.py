@@ -21,15 +21,15 @@ def bw_calculator():
     root = tk.Tk()
     root.title("数值模拟器")
     root.geometry("300x500")
-    armor_label1 = tk.Label(root, text="选择护甲种类:")
+    armor_label1 = tk.Label(root, text="选择护甲种类 :")
     armor_label1.pack()
-
+    pass
     armor_combobox1 = ttk.Combobox(root, values=list(armor_values1.keys()))
     armor_combobox1.pack()
     armor_combobox2 = ttk.Combobox(root, values=list(armor_values2.keys()))
     armor_combobox2.pack()
 
-    label1 = tk.Label(text="攻击临界计算：")
+    label1 = tk.Label(root,text="攻击临界计算：")
     label1.pack()
     weapon_combobox = ttk.Combobox(root, values=[4,5,6,7,8,9])
     weapon_combobox.current(1)
