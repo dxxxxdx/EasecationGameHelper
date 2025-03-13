@@ -1,3 +1,5 @@
+from itertools import count
+
 import calculator.sw_dict as sw_dict
 import random
 from calculator.sw import effctive_hp_calc
@@ -33,11 +35,12 @@ def sw_simulation(times):
 
     best_equ = orgnize_armour(total_list)
     scorex = effctive_hp_calc(best_equ)
+    useful_prop = get_useful_prop(total_list)
     if None in best_equ:
         comleted = False
     else:
         comleted = True
-    return (total_list,best_equ,comleted,scorex)
+    return (total_list,best_equ,comleted,scorex,useful_prop)
 
 
 def get_item(type_dict, times=1):
@@ -91,6 +94,18 @@ def orgnize_armour(listx):
     best_weapons = get_max_item(weapons_arr, sw_dict.weapons)
 
     return [best_helmet, best_chestplate, best_leggings, best_boots, best_weapons]
+
+
+
+def get_useful_prop (listx):
+    useful_prop = []
+    for sublist in listx:
+        for item in sublist:
+            if item in sw_dict.useful_prop :
+                useful_prop.append(item)
+    return useful_prop
+
+
 
 
 def get_max_item(items, item_dict):
@@ -170,19 +185,37 @@ def sw_simu_label_updater(res,label_set):
 
 
 def avg_effective_hp():
-    res = 0
-    for i in range(10000):
-        res += sw_simulation(3)[3]
-    print(f"平均折合血量{res/10000:.2f}")
+    for p in range(12):
+        res = 0
+        for i in range(1000):
+            res += sw_simulation(p)[3]
+        print(f"刷新{p}箱子下，平均折合血量{res/1000:.2f}")
+    print("---------------------")
 
 def avg_completeness():
-    res = 0
-    for i in range(10000):
-        res += sw_simulation(3)[2]
-    print(f"平均缺甲率{res/10000:.2f}")
+    for p in range(12):
+        res = 0
+        for i in range(1000):
+            res += sw_simulation(p)[2]
+        print(f"刷新{p}箱子下，平均缺甲率{(1000 - res)/1000:.2f}")
+    print("----------------------")
+
+
+def good_equ_rate():
+    for p in range(12):
+        countx = 0
+        for i in range(1000):
+            i = sw_simulation(p)[3]
+            if i >= 90:
+                countx += 1
+        print(f"刷新{p}箱子下，平均正常装备率：{countx / 1000}")
+    print("----------------------")
+
+
 
 
 
 if __name__ == "__main__":
     avg_completeness()
     avg_effective_hp()
+    good_equ_rate()
