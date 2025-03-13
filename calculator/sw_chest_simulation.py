@@ -169,7 +169,7 @@ def sw_simu_gui():
     label11 = tk.Label(root)
     label12 = tk.Label(root)
 
-    label_set = [label1,label2,label3,label4,label5,label6,label7,label8,label9,label10,label11]
+    label_set = [label1,label2,label3,label4,label5,label6,label7,label8,label9,label10,label11,label12]
     button1.pack()
     label1.pack()
     label2.pack()
