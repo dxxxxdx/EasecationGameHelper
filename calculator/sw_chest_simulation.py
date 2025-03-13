@@ -1,15 +1,18 @@
-from itertools import count
 
 import calculator.sw_dict as sw_dict
 import random
 from calculator.sw import effctive_hp_calc
 import tkinter as tk
-import tkinter.ttk as ttk
 
 def sw_simulation(times):
     total_list = []
+
     for j in range(times):
-        fixed_item = ["8铁锭", "铁镐_时运1_效率3", "我的装扮"]
+        fixed_item = []
+        if j == 0 :
+            fixed_item = ["8铁锭", "铁镐_时运1_效率3", "我的装扮"]
+        else:
+            pass
         fixed_item.extend(get_item(sw_dict.block_dict, 2))
         fixed_item.extend(get_item(sw_dict.prop_dict, 1))
         fixed_item.extend(get_item(sw_dict.thrown_dict, 1))
@@ -36,11 +39,12 @@ def sw_simulation(times):
     best_equ = orgnize_armour(total_list)
     scorex = effctive_hp_calc(best_equ)
     useful_prop = get_useful_prop(total_list)
+    super_prop = have_super_prop(total_list)
     if None in best_equ:
         comleted = False
     else:
         comleted = True
-    return (total_list,best_equ,comleted,scorex,useful_prop)
+    return (total_list,best_equ,comleted,scorex,useful_prop,super_prop)
 
 
 def get_item(type_dict, times=1):
@@ -105,6 +109,13 @@ def get_useful_prop (listx):
                 useful_prop.append(item)
     return useful_prop
 
+def have_super_prop(listx):
+    res = []
+    for sublist in listx:
+        for item in sublist:
+            if item in sw_dict.super_prop :
+                res.append(item)
+    return res
 
 
 
@@ -155,8 +166,10 @@ def sw_simu_gui():
     label8 = tk.Label(root)
     label9 = tk.Label(root)
     label10 = tk.Label(root)
+    label11 = tk.Label(root)
+    label12 = tk.Label(root)
 
-    label_set = [label1,label2,label3,label4,label5,label6,label7,label8,label9,label10]
+    label_set = [label1,label2,label3,label4,label5,label6,label7,label8,label9,label10,label11]
     button1.pack()
     label1.pack()
     label2.pack()
@@ -168,6 +181,8 @@ def sw_simu_gui():
     label8.pack()
     label9.pack()
     label10.pack()
+    label11.pack()
+    label12.pack()
 
     root.mainloop()
 
@@ -179,9 +194,11 @@ def sw_simu_label_updater(res,label_set):
     total_list = res[0]
     for i,sublist in enumerate(total_list,start=1):
         label_set[i].configure(text=sublist)
-    label_set[-3].configure(text=f"\n你的最好装备：{res[1]}",fg="red")
+    label_set[-5].configure(text=f"\n你有的真神器{res[5]}")
+    label_set[-4].configure(text=f"你的关键道具为：{res[4]}",fg="red")
+    label_set[-3].configure(text=f"你的最好装备：{res[1]}",fg="red")
     label_set[-2].configure(text=f'你的缺甲状态为：{not res[2]}')
-    label_set[-1].configure(text=f"你装备的折合血量为{res[3]:.2f}")
+    label_set[-1].configure(text=f"你装备的折合血量为{res[3]:.4f}")
 
 
 def avg_effective_hp():
@@ -197,7 +214,7 @@ def avg_completeness():
         res = 0
         for i in range(1000):
             res += sw_simulation(p)[2]
-        print(f"刷新{p}箱子下，平均缺甲率{(1000 - res)/1000:.2f}")
+        print(f"刷新{p}箱子下，平均缺甲率{(1000 - res)/10:.4f}")
     print("----------------------")
 
 
@@ -206,12 +223,20 @@ def good_equ_rate():
         countx = 0
         for i in range(1000):
             i = sw_simulation(p)[3]
-            if i >= 90:
+            if i >= 150:
                 countx += 1
-        print(f"刷新{p}箱子下，平均正常装备率：{countx / 1000}")
+        print(f"刷新{p}箱子下，平均正常装备率：{countx / 10}")
     print("----------------------")
 
-
+def get_super_prop_rate():
+    print("真神器指秒人斧，附魔金，图腾")
+    for p in range(5):
+        res = 0
+        for i in range(10000):
+            a = sw_simulation(p)[5]
+            if a:
+                res += 1
+        print(f"刷新{p}箱子下，平均拿到真神器率{res/100:.4f}")
 
 
 
@@ -219,3 +244,4 @@ if __name__ == "__main__":
     avg_completeness()
     avg_effective_hp()
     good_equ_rate()
+    get_super_prop_rate()
