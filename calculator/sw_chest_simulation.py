@@ -1,8 +1,16 @@
-
 import calculator.sw_dict as sw_dict
 import random
 from calculator.sw import effctive_hp_calc
 import tkinter as tk
+
+class SimuResult:
+    def __init__(self, total_list, best_equ, comleted, scorex, useful_prop, super_prop):
+        self.total_list = total_list
+        self.best_equ = best_equ
+        self.comleted = comleted
+        self.scorex = scorex
+        self.useful_prop = useful_prop
+        self.super_prop = super_prop
 
 def sw_simulation(times):
     total_list = []
@@ -40,19 +48,15 @@ def sw_simulation(times):
     scorex = effctive_hp_calc(best_equ)
     useful_prop = get_useful_prop(total_list)
     super_prop = have_super_prop(total_list)
-    if None in best_equ:
-        comleted = False
-    else:
-        comleted = True
-    return (total_list,best_equ,comleted,scorex,useful_prop,super_prop)
+    comleted = None not in best_equ
 
+    return SimuResult(total_list, best_equ, comleted, scorex, useful_prop, super_prop)
 
 def get_item(type_dict, times=1):
     name_list = list(type_dict.keys())
     weight_list = list(type_dict.values())
     res = random.choices(name_list, weights=weight_list, k=times)
     return res
-
 
 def get_armour(type_a_b, times=1):
     armour_list = [sw_dict.level_1_dict, sw_dict.level_2_dict, sw_dict.level_3_dict, sw_dict.level_4_dict,
@@ -69,7 +73,6 @@ def get_armour(type_a_b, times=1):
 
     res = random.choices(list(tar_dict.keys()), weights=list(tar_dict.values()), k=times)
     return res
-
 
 def orgnize_armour(listx):
     helmet_arr = []
@@ -90,6 +93,8 @@ def orgnize_armour(listx):
                 boots_arr.append(item)
             elif item in sw_dict.weapons:
                 weapons_arr.append(item)
+            else:
+                pass
 
     best_helmet = get_max_item(helmet_arr, sw_dict.helmets)
     best_chestplate = get_max_item(chestplate_arr, sw_dict.chestplates)
@@ -98,8 +103,6 @@ def orgnize_armour(listx):
     best_weapons = get_max_item(weapons_arr, sw_dict.weapons)
 
     return [best_helmet, best_chestplate, best_leggings, best_boots, best_weapons]
-
-
 
 def get_useful_prop (listx):
     useful_prop = []
@@ -117,19 +120,12 @@ def have_super_prop(listx):
                 res.append(item)
     return res
 
-
-
 def get_max_item(items, item_dict):
-    # 初始化最大值和对应的元素
     max_value = float('-inf')
     max_item = None
-    # 遍历列表中的元素
     for item in items:
-        # 检查元素是否在字典中
         if item in item_dict:
-            # 获取元素对应的值
             value = item_dict[item]
-            # 更新最大值和对应的元素
             if value > max_value:
                 max_value = value
                 max_item = item
@@ -143,10 +139,6 @@ def score(best_equ):
     total = score1 + score2 + score3 + score4
     return total
 
-
-
-
-
 def sw_simu_gui():
     root = tk.Tk()
     root.geometry("1000x500")
@@ -156,56 +148,30 @@ def sw_simu_gui():
         nonlocal res
         res = sw_simulation(3)
         sw_simu_label_updater(res,label_set)
-    label1 = tk.Label(root)
-    label2 = tk.Label(root)
-    label3 = tk.Label(root)
-    label4 = tk.Label(root)
-    label5 = tk.Label(root)
-    label6 = tk.Label(root)
-    label7 = tk.Label(root)
-    label8 = tk.Label(root)
-    label9 = tk.Label(root)
-    label10 = tk.Label(root)
-    label11 = tk.Label(root)
-    label12 = tk.Label(root)
+    label_set = [tk.Label(root) for _ in range(12)]
 
-    label_set = [label1,label2,label3,label4,label5,label6,label7,label8,label9,label10,label11,label12]
+    for label in label_set:
+        label.pack()
+
     button1.pack()
-    label1.pack()
-    label2.pack()
-    label3.pack()
-    label4.pack()
-    label5.pack()
-    label6.pack()
-    label7.pack()
-    label8.pack()
-    label9.pack()
-    label10.pack()
-    label11.pack()
-    label12.pack()
 
     root.mainloop()
 
-
-
-
-
 def sw_simu_label_updater(res,label_set):
-    total_list = res[0]
-    for i,sublist in enumerate(total_list,start=1):
+    total_list = res.total_list
+    for i, sublist in enumerate(total_list, start=1):
         label_set[i].configure(text=sublist)
-    label_set[-5].configure(text=f"\n你有的真神器{res[5]}")
-    label_set[-4].configure(text=f"你的关键道具为：{res[4]}",fg="red")
-    label_set[-3].configure(text=f"你的最好装备：{res[1]}",fg="red")
-    label_set[-2].configure(text=f'你的缺甲状态为：{not res[2]}')
-    label_set[-1].configure(text=f"你装备的折合血量为{res[3]:.4f}")
-
+    label_set[-5].configure(text=f"\n你有的真神器{res.super_prop}")
+    label_set[-4].configure(text=f"你的关键道具为：{res.useful_prop}", fg="red")
+    label_set[-3].configure(text=f"你的最好装备：{res.best_equ}", fg="red")
+    label_set[-2].configure(text=f'你的缺甲状态为：{not res.comleted}')
+    label_set[-1].configure(text=f"你装备的折合血量为{res.scorex:.4f}")
 
 def avg_effective_hp():
     for p in range(12):
         res = 0
         for i in range(1000):
-            res += sw_simulation(p)[3]
+            res += sw_simulation(p).scorex
         print(f"刷新{p}箱子下，平均折合血量{res/1000:.2f}")
     print("---------------------")
 
@@ -213,19 +179,18 @@ def avg_completeness():
     for p in range(12):
         res = 0
         for i in range(1000):
-            res += sw_simulation(p)[2]
+            res += sw_simulation(p).comleted
         print(f"刷新{p}箱子下，平均缺甲率{(1000 - res)/10:.4f}")
     print("----------------------")
 
-
-def good_equ_rate():
+def good_equ_rate(eff_hp):
     for p in range(12):
         countx = 0
         for i in range(1000):
-            i = sw_simulation(p)[3]
-            if i >= 150:
+            i = sw_simulation(p).scorex
+            if i >= eff_hp:
                 countx += 1
-        print(f"刷新{p}箱子下，平均正常装备率：{countx / 10}")
+        print(f"刷新{p}箱子下，平均正常装备（超过{eff_hp}）率：{countx / 10}")
     print("----------------------")
 
 def get_super_prop_rate():
@@ -233,15 +198,13 @@ def get_super_prop_rate():
     for p in range(5):
         res = 0
         for i in range(10000):
-            a = sw_simulation(p)[5]
+            a = sw_simulation(p).super_prop
             if a:
                 res += 1
         print(f"刷新{p}箱子下，平均拿到真神器率{res/100:.4f}")
 
-
-
 if __name__ == "__main__":
-    avg_completeness()
+    #avg_completeness()
     avg_effective_hp()
-    good_equ_rate()
-    get_super_prop_rate()
+    #good_equ_rate(120)
+    #get_super_prop_rate()

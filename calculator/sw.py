@@ -123,19 +123,24 @@ def sw_calculator():
 
 def effctive_hp_calc(best_equ):
     arr = [
-        armor_values1.get(best_equ[0], [0, 0, 0]),
-        armor_values2.get(best_equ[1], [0, 0, 0]),
-        armor_values3.get(best_equ[2], [0, 0, 0]),
-        armor_values4.get(best_equ[3], [0, 0, 0])
+        armor_values1.get(best_equ[0], best_equ[0]),
+        armor_values2.get(best_equ[1], best_equ[1]),
+        armor_values3.get(best_equ[2], best_equ[2]),
+        armor_values4.get(best_equ[3], best_equ[3]),
     ]
 
+    for i in arr :
+        if i in best_equ and i is not None:
+            print(i)
     armor_value = 0
     enc_value = 0
     bouns_hp = 0
     for i in arr:
-        armor_value += i[0]
-        enc_value += i[1]
-        bouns_hp += i[2]
+        if i not in best_equ :
+            armor_value += i[0]
+            enc_value += i[1]
+            bouns_hp += i[2]
+
     total_hp = (20 + bouns_hp) / ((100 - armor_value * 4) / 100) / ((100 - enc_value * 4) / 100)
 
     return total_hp
