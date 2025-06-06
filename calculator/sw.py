@@ -48,7 +48,8 @@ armor_values4 = {
 }
 def sw_calculator():
 
-
+    fight_level = 0
+    total_hp = 0
     root = tk.Tk()
     root.title("数值模拟器")
     root.geometry("300x500")
@@ -69,7 +70,12 @@ def sw_calculator():
     weapon_combobox.current(3)
     weapon_combobox.pack()
 
+
     def calculate_armor_values(event=None):
+        nonlocal fight_level
+        nonlocal total_hp
+        legacy_level = fight_level
+        legacy_total_hp = total_hp
         a = armor_combobox1.get()
         b = armor_combobox2.get()
         c = armor_combobox3.get()
@@ -99,8 +105,22 @@ def sw_calculator():
 
         result_label2.config(text=f"临界表：{lim}")
         result_label3.config(text=f"每刀伤害：{int(weapon_damage)* ((100 - res_arm * 4) / 100) * ((100 - res_enc * 4) / 100):.2f}")
+        fight_level = total_hp * int(weapon_damage)
+        result_label4.config(text=f"战斗力{fight_level:.2f}")
+        delta_level = fight_level - legacy_level
+        if delta_level >=0:
+            result_label5.config(text=f"战斗力变化 +{delta_level:.2f}",fg="green")
+        else:
+            result_label5.config(text=f"战斗力变化 {delta_level:.2f}",fg="red")
+        delta_hp = total_hp - legacy_total_hp
+        if delta_hp >=0:
+            result_label6.config(text=f"折合血量变化 +{delta_hp:.2f}",fg="green")
+        else:
+            result_label6.config(text=f"折合血量变化 {delta_hp:.2f}",fg="red")
 
-    # 绑定事件
+
+
+        # 绑定事件
     armor_combobox1.bind("<<ComboboxSelected>>", calculate_armor_values)
     armor_combobox2.bind("<<ComboboxSelected>>", calculate_armor_values)
     armor_combobox3.bind("<<ComboboxSelected>>", calculate_armor_values)
@@ -113,8 +133,14 @@ def sw_calculator():
     result_label.pack()
     result_label2 = tk.Label(root, text="临界数值：")
     result_label2.pack()
-    result_label3 = tk.Label(root, text="")
+    result_label3 = tk.Label(root, text="---")
     result_label3.pack()
+    result_label4 = tk.Label(root, text="战斗力")
+    result_label4.pack()
+    result_label5 = tk.Label(root, text="---")
+    result_label5.pack()
+    result_label6 = tk.Label(root, text="---")
+    result_label6.pack()
 
     root.mainloop()
 
@@ -148,3 +174,5 @@ def effctive_hp_calc(best_equ):
 
 
 
+if __name__ == '__main__':
+    sw_calculator()

@@ -185,26 +185,28 @@ def avg_completeness():
 
 def good_equ_rate(eff_hp):
     for p in range(12):
+        p = 3
         countx = 0
-        for i in range(1000):
+        for i in range(100000):
             i = sw_simulation(p).scorex
             if i >= eff_hp:
                 countx += 1
-        print(f"刷新{p}箱子下，平均正常装备（超过{eff_hp}）率：{countx / 10}")
+        print(f"刷新{p}箱子下，平均正常装备（超过{eff_hp}）率：{countx / 1000}")
     print("----------------------")
 
 def get_super_prop_rate():
     print("真神器指秒人斧，附魔金，图腾")
-    for p in range(5):
+    for p in range(16):
         res = 0
-        for i in range(10000):
+        for i in range(1000):
             a = sw_simulation(p).super_prop
             if a:
                 res += 1
-        print(f"刷新{p}箱子下，平均拿到真神器率{res/100:.4f}")
+        print(f"刷新{p}箱子下，平均拿到真神器率{res/10:.4f}")
 
 if __name__ == "__main__":
     #avg_completeness()
-    avg_effective_hp()
-    #good_equ_rate(120)
+    #avg_effective_hp()
+    good_equ_rate(200)
     #get_super_prop_rate()
+
