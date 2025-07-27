@@ -4,11 +4,10 @@ import math
 
 armor_values1 = {
     "空": [0, 0, 0],
-    "锁链头盔_保护4": [2, 4, 0],
-    "铁头盔_保护3": [2, 3, 0],
-    "金头盔_超级": [2, 0, 0],
-    "金头盔_火焰保护10": [2, 0, 0],
+    "金头盔": [2, 0, 0],
     '铁头盔_投射物保护6_爆炸保护6': [2,0,0],
+    "铁头盔_保护3": [2, 3, 0],
+    "锁链头盔_保护4": [2, 4, 0],
     "钻石头盔": [3, 0, 0],
     "钻石头盔_保护1": [3, 1, 0],
     "下界合金头盔": [3, 0, 2],
@@ -27,9 +26,9 @@ armor_values2 = {
 
 armor_values3 = {
     "空": [0, 0, 0],
+    "铁护腿_火焰保护6_爆炸保护6": [5, 0, 0],
     "锁链护腿_保护4": [4, 4, 0],
     "铁护腿_保护3": [5, 3, 0],
-    "铁护腿_火焰保护6_爆炸保护6": [5, 0, 0],
     "钻石护腿": [6, 0, 0],
     "钻石护腿_保护1": [6, 1, 0],
     "下界合金护腿": [6, 0, 2],
@@ -45,6 +44,10 @@ armor_values4 = {
     "下界合金靴": [3, 0, 2],
     "下界合金靴_保护2": [3, 2, 2],
     "抗性鞋": [3, 2, 0]
+}
+with_golden_apple = {
+    "无金苹果":False ,
+    "有金苹果":True
 }
 def sw_calculator():
 
@@ -64,6 +67,8 @@ def sw_calculator():
     armor_combobox3.pack()
     armor_combobox4 = ttk.Combobox(root, values=list(armor_values4.keys()))
     armor_combobox4.pack()
+    golden_apple_combobox = ttk.Combobox(root, values=list(with_golden_apple.keys()))
+    golden_apple_combobox.pack()
     label1 = tk.Label(root,text="攻击临界计算：")
     label1.pack()
     weapon_combobox = ttk.Combobox(root, values=[5,6,7,8,9,10,11,12])
@@ -84,12 +89,17 @@ def sw_calculator():
         values_b = armor_values2.get(b, [0, 0, 0])
         values_c = armor_values3.get(c, [0, 0, 0])
         values_d = armor_values4.get(d, [0, 0, 0])
+        e = golden_apple_combobox.get()
+        with_golden_apple_ = with_golden_apple.get(e,False)
 
         # 将数组中的值相加
         total_values = [sum(x) for x in zip(values_a, values_b, values_c, values_d)]
         res_arm = total_values[0]
         res_enc = total_values[1]
-        bouns_hp = total_values[2]
+        if with_golden_apple_:
+            bouns_hp = total_values[2] + 4
+        else:
+            bouns_hp = total_values[2]
 
         total_hp  = (20 + bouns_hp) / ((100 - res_arm * 4) / 100) / ((100 - res_enc * 4) / 100)
         result_label.config(text=f"折合血量为：{total_hp:.2f}")
@@ -126,6 +136,7 @@ def sw_calculator():
     armor_combobox3.bind("<<ComboboxSelected>>", calculate_armor_values)
     armor_combobox4.bind("<<ComboboxSelected>>", calculate_armor_values)
     weapon_combobox.bind("<<ComboboxSelected>>", calculate_armor_values)
+    golden_apple_combobox.bind("<<ComboboxSelected>>", calculate_armor_values)
 
     calculate_button = tk.Button(root, text="计算总防御力", command=calculate_armor_values)
     calculate_button.pack()
