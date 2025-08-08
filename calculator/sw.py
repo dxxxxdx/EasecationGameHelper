@@ -168,7 +168,8 @@ def effctive_hp_calc(best_equ):
 
     for i in arr :
         if i in best_equ and i is not None:
-            print(i)
+            #print(i)
+            pass
     armor_value = 0
     enc_value = 0
     bouns_hp = 0

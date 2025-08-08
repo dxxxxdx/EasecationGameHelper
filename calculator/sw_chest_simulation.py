@@ -3,14 +3,20 @@ import random
 from calculator.sw import effctive_hp_calc
 import tkinter as tk
 
+import matplotlib.pyplot as plt
+
+
+
 class SimuResult:
-    def __init__(self, total_list, best_equ, comleted, scorex, useful_prop, super_prop):
+    def __init__(self, total_list, best_equ, comleted, scorex, useful_prop, super_prop,have_gap,fight_level):
         self.total_list = total_list
         self.best_equ = best_equ
         self.comleted = comleted
         self.scorex = scorex
         self.useful_prop = useful_prop
         self.super_prop = super_prop
+        self.have_gap = have_gap
+        self.fight_level = fight_level
 
 def sw_simulation(times):
     total_list = []
@@ -49,8 +55,16 @@ def sw_simulation(times):
     useful_prop = get_useful_prop(total_list)
     super_prop = have_super_prop(total_list)
     comleted = None not in best_equ
+    have_gap = get_gap(total_list)
+    fight_level = 0
+    try:
+        weapon_damage =  sw_dict.weapons.get(best_equ[4],-1)
+        if weapon_damage != -1:
+            fight_level = scorex * weapon_damage
+    except:
+        pass
 
-    return SimuResult(total_list, best_equ, comleted, scorex, useful_prop, super_prop)
+    return SimuResult(total_list, best_equ, comleted, scorex, useful_prop, super_prop,have_gap,fight_level)
 
 def get_item(type_dict, times=1):
     name_list = list(type_dict.keys())
@@ -130,6 +144,10 @@ def get_max_item(items, item_dict):
                 max_value = value
                 max_item = item
     return max_item
+def get_gap(listx):
+    for sublist in listx:
+        if "金苹果_2" in sublist or "金苹果_4" in sublist or "金苹果_8" in sublist:
+            return True
 
 def score(best_equ):
     score1 = sw_dict.helmets.get(best_equ,0)
@@ -204,9 +222,49 @@ def get_super_prop_rate():
                 res += 1
         print(f"刷新{p}箱子下，平均拿到真神器率{res/10:.4f}")
 
-if __name__ == "__main__":
-    #avg_completeness()
-    #avg_effective_hp()
-    good_equ_rate(200)
-    #get_super_prop_rate()
 
+
+def total_data(times):
+
+    for p in range(12):
+        res_cpt = 0
+        expect_eff_hp = 100
+        res_good_rate = 0
+        res_super_prop = 0
+        res_have_gap = 0
+        res_eff_hp = []
+        res_fight_level = []
+        for i in range(times):
+            res = sw_simulation(p)
+            res_cpt += res.comleted
+            if (res.scorex > expect_eff_hp):
+                res_good_rate += 1
+            if (res.super_prop):
+                res_super_prop += 1
+            if (res.have_gap):
+                res_have_gap += 1
+            res_eff_hp.append(res.scorex)
+            res_fight_level.append(res.fight_level)
+        res_eff_hp.sort()
+        res_fight_level.sort()
+        plt.plot(res_fight_level, marker='o')  # marker='o' 表示点的样式为圆圈
+        plt.title(f'simulation with {p} chest')
+        plt.xlabel('player')
+        plt.ylabel('level')
+        plt.grid(True)
+        plt.show()
+
+        print(f"刷新{p}箱子下，折合血量中位数为{res_eff_hp[int(len(res_eff_hp)/2)]:.4f}")
+        print(f"刷新{p}箱子下，战斗力中位数为{res_fight_level[int(len(res_fight_level) / 2)]:.4f}")
+        print(f"刷新{p}箱子下，平均正常装备（超过{expect_eff_hp}）率：{res_good_rate / (times/100)}")
+        print(f"刷新{p}箱子下，平均折合血量{sum(res_eff_hp)/len(res_eff_hp):.2f}")
+        print(f"刷新{p}箱子下，平均战斗力{sum(res_fight_level) / len(res_fight_level):.2f}")
+        print(f"刷新{p}箱子下，平均缺甲率{(times - res_cpt) / (times/100):.4f}")
+        print("真神器指秒人斧，附魔金，图腾")
+        print(f"刷新{p}箱子下，平均拿到真神器率{res_super_prop / (times/100):.4f}")
+        print(f"刷新{p}箱子下，没有苹果吃的概率为{(times - res_have_gap) / (times/100):.4f}")
+        print("=================================================")
+
+
+if __name__ == "__main__":
+    total_data(10000)
