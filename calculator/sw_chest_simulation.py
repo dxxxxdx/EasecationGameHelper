@@ -247,12 +247,15 @@ def total_data(times):
             res_fight_level.append(res.fight_level)
         res_eff_hp.sort()
         res_fight_level.sort()
-        plt.plot(res_fight_level, marker='o')  # marker='o' 表示点的样式为圆圈
+
+
+        plt.plot(res_eff_hp, marker='o')  # marker='o' 表示点的样式为圆圈
         plt.title(f'simulation with {p} chest')
         plt.xlabel('player')
         plt.ylabel('level')
         plt.grid(True)
         plt.show()
+
 
         print(f"刷新{p}箱子下，折合血量中位数为{res_eff_hp[int(len(res_eff_hp)/2)]:.4f}")
         print(f"刷新{p}箱子下，战斗力中位数为{res_fight_level[int(len(res_fight_level) / 2)]:.4f}")
