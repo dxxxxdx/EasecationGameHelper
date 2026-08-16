@@ -268,6 +268,175 @@ def total_data(times):
         print(f"刷新{p}箱子下，没有苹果吃的概率为{(times - res_have_gap) / (times/100):.4f}")
         print("=================================================")
 
+def total_data_with_basic_chest(times):
+    """
+    对比：
+        1. 纯随机开箱
+        2. 纯随机开箱 + 新手保护箱最低装备
 
+    新手保护箱最低装备：
+        锁链头盔_保护4
+        铁胸甲_保护3
+        铁护腿_保护3
+        铁靴_保护3
+    """
+
+    basic_chest = [
+        "锁链头盔_保护4",
+        "铁胸甲_保护3",
+        "铁护腿_保护3",
+        "铁靴_保护3",
+    ]
+
+    expect_eff_hp = 100
+
+    for p in range(12):
+        normal_eff_hp = []
+        basic_eff_hp = []
+        basic_fight_level = []
+
+        res_good_rate = 0
+        res_super_prop = 0
+        res_have_gap = 0
+        res_armour_completed = 0
+
+        for i in range(times):
+            # 先正常模拟 p 个箱子
+            res = sw_simulation(p)
+
+            normal_eff_hp.append(res.scorex)
+
+            # 不修改原来的 res.total_list，
+            # 复制一份后追加保底箱
+            total_list_with_basic = list(res.total_list)
+            total_list_with_basic.append(basic_chest)
+
+            # 重新选取最优装备
+            best_equ = orgnize_armour(total_list_with_basic)
+
+            # 重新计算折合血量
+            scorex = effctive_hp_calc(best_equ)
+            basic_eff_hp.append(scorex)
+
+            if scorex > expect_eff_hp:
+                res_good_rate += 1
+
+            # 注意：
+            # best_equ[4] 是武器。
+            # “缺甲”只应该看前四项，
+            # 否则没武器也会被你原代码统计成“缺甲”。
+            if None not in best_equ[:4]:
+                res_armour_completed += 1
+
+            # 真神器、苹果与保底甲无关，
+            # 直接继承本次随机开箱结果。
+            if res.super_prop:
+                res_super_prop += 1
+
+            if res.have_gap:
+                res_have_gap += 1
+
+            # 重新计算战斗力
+            fight_level = 0
+            weapon = best_equ[4]
+
+            if weapon is not None:
+                weapon_damage = sw_dict.weapons.get(weapon, -1)
+
+                if weapon_damage != -1:
+                    fight_level = scorex * weapon_damage
+
+            basic_fight_level.append(fight_level)
+
+        normal_eff_hp.sort()
+        basic_eff_hp.sort()
+        basic_fight_level.sort()
+
+        #
+        # 同图比较，直接看左尾被保底切掉多少
+        #
+        plt.plot(
+            normal_eff_hp,
+            label="normal"
+        )
+
+        plt.plot(
+            basic_eff_hp,
+            label="with basic chest"
+        )
+
+        plt.title(f"simulation with {p} chest")
+        plt.xlabel("player")
+        plt.ylabel("effective hp")
+        plt.grid(True)
+        plt.legend()
+        plt.show()
+
+        #
+        # 分位数
+        #
+        def percentile(data, percent):
+            index = int((len(data) - 1) * percent)
+            return data[index]
+
+        print(f"刷新{p}箱子 + 保底箱")
+
+        print(
+            f"折合血量中位数："
+            f"{percentile(basic_eff_hp, 0.50):.4f}"
+        )
+
+        print(
+            f"战斗力中位数："
+            f"{percentile(basic_fight_level, 0.50):.4f}"
+        )
+
+        print(
+            f"P1 / P5 / P10 折合血量："
+            f"{percentile(basic_eff_hp, 0.01):.2f} / "
+            f"{percentile(basic_eff_hp, 0.05):.2f} / "
+            f"{percentile(basic_eff_hp, 0.10):.2f}"
+        )
+
+        print(
+            f"P90 / P95 / P99 折合血量："
+            f"{percentile(basic_eff_hp, 0.90):.2f} / "
+            f"{percentile(basic_eff_hp, 0.95):.2f} / "
+            f"{percentile(basic_eff_hp, 0.99):.2f}"
+        )
+
+        print(
+            f"平均正常装备（超过{expect_eff_hp}）率："
+            f"{res_good_rate / (times / 100):.4f}"
+        )
+
+        print(
+            f"平均折合血量："
+            f"{sum(basic_eff_hp) / len(basic_eff_hp):.2f}"
+        )
+
+        print(
+            f"平均战斗力："
+            f"{sum(basic_fight_level) / len(basic_fight_level):.2f}"
+        )
+
+        print(
+            f"平均缺甲率："
+            f"{(times - res_armour_completed) / (times / 100):.4f}"
+        )
+
+        print("真神器指秒人斧，附魔金，图腾")
+
+        print(
+            f"平均拿到真神器率："
+            f"{res_super_prop / (times / 100):.4f}"
+        )
+
+        print(
+            f"没有苹果吃的概率："
+            f"{(times - res_have_gap) / (times / 100):.4f}"
+        )
+
+        print("=================================================")
 if __name__ == "__main__":
-    total_data(10000)
+    total_data_with_basic_chest(10000)
